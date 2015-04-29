@@ -3,19 +3,26 @@
 #include <vector>
 #include <fstream>
 
+// A transitions id
 using transition_t = unsigned;
+// A node's id
+using node_t = unsigned;
 
+// The content of a transition
 struct transition {
-    unsigned next;
     unsigned dst;
-    transition(unsigned n, unsigned d)
-        : next(n), dst(d)
+    transition() = default;
+    transition(unsigned d)
+        : dst(d)
     {}
 };
 
 struct node {
     unsigned deg;
     transition_t first;
+    node(unsigned d, transition_t f)
+        : deg(d), first(f)
+    {}
 };
 
 using nodes_t = std::vector<node>;
@@ -26,7 +33,8 @@ struct graph {
     void print();
 
 private:
-    void add_transition(transition_t src, transition_t dst);
+    void add_transition(std::vector<unsigned short>& offset, node_t src,
+                        node_t dst);
     nodes_t nodes;
     transitions_t transitions;
 };

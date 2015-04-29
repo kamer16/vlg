@@ -9,43 +9,47 @@ graph::graph(fstream& fs) {
     unsigned nb_states;
     unsigned nb_tr = 0;
     fs >> nb_states;
-    nodes = nodes_t(nb_states);
-    assert(nodes.size() == nb_states);
+    nodes = nodes_t();
+    nodes.reserve(nb_states);
 
     for (unsigned i = 0; i < nb_states; ++i) {
         unsigned idx;
         unsigned deg;
         fs >> idx >> deg;
-        nodes[idx].deg = deg;
+        nodes.emplace_back(deg, nb_tr);
+        // nb_tr also corresponds to the idx in our transitions_t
         nb_tr += deg;
     }
-    transitions.reserve(1 + nb_tr);
-    // Push sentinell transition which will act as nullptr
-    transitions.emplace_back(0, 0);
-    unsigned src, dst;
+
+    // An offset table (init to 0) needed when inserting a new transition
+    // We assume that a node has at most 2^16-1 degree
+    vector<unsigned short> offset(nb_states);
+    // Initialize all transitions to 0
+    transitions = transitions_t(nb_tr);
+    node_t src, dst;
     fs >> src >> dst;
     while (!fs.eof()) {
-        add_transition(src, dst);
-        add_transition(dst, src);
+        add_transition(offset, src, dst);
+        add_transition(offset, dst, src);
         fs >> src >> dst;
     }
-    assert(transitions.size() == 1 + nb_tr);
+    assert(transitions.size() == nb_tr);
 }
 
 void graph::print() {
+    cout << "node: " << endl;
     for (unsigned i = 0; i < nodes.size(); ++i) {
         cout << "node: " << i << endl;
         const node& n = nodes[i];
-        transition_t t = n.first;
-        while (t) {
-            cout << transitions[t].dst << endl;
-            t = transitions[t].next;
+        for (unsigned t = 0; t < n.deg; ++t) {
+            cout << transitions[t + n.first].dst << endl;
         }
     }
 }
 
-void graph::add_transition(transition_t src, transition_t dst) {
-    transition_t succ = nodes[dst].first;
-    transitions.emplace_back(succ, src);
-    nodes[dst].first = static_cast<unsigned>(transitions.size() - 1);
+void graph::add_transition(vector<unsigned short>& offset, node_t src,
+                           node_t dst) {
+    transition_t idx = offset[src] + nodes[src].first;
+    transitions[idx] = dst;
+    offset[src]++;
 }
