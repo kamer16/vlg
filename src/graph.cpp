@@ -1,9 +1,36 @@
 #include <cassert>
 #include <iostream>
+#include <deque>
 
 #include "graph.hpp"
 
 using namespace std;
+
+unsigned graph::eccentricity(node_t start) {
+    unsigned height = 0;
+    vector<bool> seen(nodes.size(), false);
+    deque<unsigned> todo;
+    todo.emplace_back(start);
+    while (!todo.empty()) {
+        ++height;
+        size_t len = todo.size();
+        // Iterate from 0 to todo.size(), romev those elements and add new
+        // ones at back withouth iterating on them
+        for (unsigned i = 0; i < len; ++i) {
+            node_t id = todo.front();
+            todo.pop_front();
+            const node& src = nodes[id];
+            for (unsigned t = 0; t < src.deg; ++t) {
+                node_t dst = transitions[t + src.first].dst;
+                if (!seen[dst]) {
+                    todo.emplace_back(dst);
+                    seen[dst] = true;
+                }
+            }
+        }
+    }
+    return height - 1;
+}
 
 graph::graph(fstream& fs) {
     unsigned nb_states;

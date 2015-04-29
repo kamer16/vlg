@@ -31,6 +31,7 @@ using transitions_t = std::vector<transition>;
 struct graph {
     graph(std::fstream& fs);
     void print();
+    unsigned eccentricity(node_t start);
 
 private:
     void add_transition(std::vector<unsigned short>& offset, node_t src,
@@ -38,4 +39,3 @@ private:
     nodes_t nodes;
     transitions_t transitions;
 };
-
