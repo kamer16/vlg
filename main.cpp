@@ -3,21 +3,21 @@
 #include <vector>
 #include <cassert>
 
+#include "graph.hpp"
+
 using namespace std;
-using transition_t = unsigned;
 
-struct transition {
-    unsigned next;
-    unsigned dst;
-    transition(unsigned n, unsigned d)
-        : next(n), dst(d)
-    {}
-};
-
-struct node {
-    unsigned deg;
-    transition_t first;
-};
+void iterate_graph(const nodes_t& nodes, const transitions_t& transitions) {
+    for (unsigned i = 0; i < nodes.size(); ++i) {
+        cout << "node: " << i << endl;
+        const node& n = nodes[i];
+        transition_t t = n.first;
+        while (t) {
+            cout << transitions[t].dst << endl;
+            t = transitions[t].next;
+        }
+    }
+}
 
 int main(int argc, char* argv[]) {
     std::fstream fs;
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     unsigned nb_states;
     unsigned nb_tr = 0;
     fs >> nb_states;
-    vector<node> nodes(nb_states);
+    nodes_t nodes(nb_states);
     assert(nodes.size() == nb_states);
 
     for (unsigned i = 0; i < nb_states; ++i) {
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
         nb_tr += deg;
     }
     assert(nb_tr % 2 == 0);
-    vector<transition> transitions;
+    transitions_t transitions;
     transitions.reserve(1 + nb_tr);
     // Push sentinell transition
     transitions.emplace_back(0, 0);
@@ -45,39 +45,16 @@ int main(int argc, char* argv[]) {
     fs >> src >> dst;
     while (!fs.eof()) {
         {
-            transitions.emplace_back(0, dst);
-            transition_t prev = nodes[src].last;
-            nodes[src].last = transitions.size() - 1;
-            if (!nodes[src].first) {
-                nodes[src].first = nodes[src].last;
-            } else if (prev == nodes[src].first) {
-                // Handles when first == last and first != last
-                transitions[prev].next = nodes[src].last;
-            }
+            transition_t succ = nodes[src].first;
+            transitions.emplace_back(succ, dst);
+            nodes[src].first = transitions.size() - 1;
         }
         {
-            transitions.emplace_back(0, src);
-            transition_t prev = nodes[dst].last;
-            nodes[dst].last = transitions.size() - 1;
-            if (!nodes[dst].first) {
-                nodes[dst].first = nodes[dst].last;
-            } else { //if (prev == nodes[dst].first) {
-                // Handles when first == last and first != last
-                transitions[prev].next = nodes[dst].last;
-            }
+            transition_t succ = nodes[dst].first;
+            transitions.emplace_back(succ, src);
+            nodes[dst].first = transitions.size() - 1;
         }
         fs >> src >> dst;
     }
     assert(transitions.size() == 1 + nb_tr);
-
-
-    for (unsigned i = 0; i < nodes.size(); ++i) {
-        cout << "node: " << i << endl;
-        struct node& n = nodes[i];
-        transition_t t = n.first;
-        while (t) {
-            cout << transitions[t].dst << endl;
-            t = transitions[t].next;
-        }
-    }
 }
