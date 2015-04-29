@@ -6,6 +6,39 @@
 
 using namespace std;
 
+void graph::scc_bfs(node_t start) {
+    deque<unsigned> todo;
+    todo.emplace_back(start);
+    scc_size.push_back(1);
+    scc[start] = static_cast<unsigned>(scc_size.size() - 1);
+    while (!todo.empty()) {
+        node_t id = todo.front();
+        todo.pop_front();
+        const node& src = nodes[id];
+        for (unsigned t = 0; t < src.deg; ++t) {
+          node_t dst = transitions[t + src.first].dst;
+          if (scc[dst] == -1U) {
+            todo.emplace_back(dst);
+            scc[dst] = static_cast<unsigned>(scc_size.size() - 1);
+            scc_size[scc_size.size() - 1]++;
+          }
+        }
+    }
+}
+
+unsigned graph::compute_scc() {
+    scc.assign(nodes.size(), -1U);
+    unsigned res = 0;
+    for (unsigned i = 0; i < nodes.size(); ++i) {
+        if (scc[i] == -1U) {
+            scc_bfs(i);
+            unsigned idx = static_cast<unsigned>(scc_size.size() - 1);
+            res = scc_size[idx] < scc_size[res] ? res : idx;
+        }
+    }
+    return res;
+}
+
 void graph::distances(node_t start, vector<unsigned>& seen) {
     deque<unsigned> todo;
     todo.emplace_back(start);

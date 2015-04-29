@@ -32,11 +32,16 @@ struct graph {
     graph(std::fstream& fs);
     void print();
     unsigned eccentricity(node_t start);
-    // returns distance from start to all other nodes + 1
+    // returns distance from start to all other nodes
     void distances(node_t start, std::vector<unsigned>& seen);
-
+    unsigned compute_scc();
     void add_transition(std::vector<unsigned short>& offset, node_t src,
                         node_t dst);
+    void scc_bfs(node_t start);
     nodes_t nodes;
     transitions_t transitions;
+
+    // Give scc component for each node
+    std::vector<unsigned> scc;
+    std::vector<unsigned> scc_size;
 };
