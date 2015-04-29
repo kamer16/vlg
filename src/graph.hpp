@@ -1,6 +1,7 @@
 #pragma once
 
-using namespace std;
+#include <vector>
+#include <fstream>
 
 using transition_t = unsigned;
 
@@ -17,5 +18,14 @@ struct node {
     transition_t first;
 };
 
-using nodes_t = vector<node>;
-using transitions_t = vector<transition>;
+using nodes_t = std::vector<node>;
+using transitions_t = std::vector<transition>;
+
+struct graph {
+    graph(std::fstream& fs);
+    void iterate();
+
+    nodes_t nodes;
+    transitions_t transitions;
+};
+

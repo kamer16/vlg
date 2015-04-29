@@ -1,0 +1,4 @@
+SOURCES=main.cpp \
+	graph.cpp
+
+OBJS=$(patsubst %.cpp, _build/%.o, $(SOURCES))
