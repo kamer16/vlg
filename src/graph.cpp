@@ -6,6 +6,25 @@
 
 using namespace std;
 
+void graph::distances(node_t start, vector<unsigned>& seen) {
+    deque<unsigned> todo;
+    todo.emplace_back(start);
+    while (!todo.empty()) {
+        // Iterate from 0 to todo.size(), romev those elements and add new
+        // ones at back withouth iterating on them
+        node_t id = todo.front();
+        todo.pop_front();
+        const node& src = nodes[id];
+        for (unsigned t = 0; t < src.deg; ++t) {
+          node_t dst = transitions[t + src.first].dst;
+          if (!seen[dst]) {
+            todo.emplace_back(dst);
+            seen[dst] = seen[id] + 1;
+          }
+        }
+    }
+}
+
 unsigned graph::eccentricity(node_t start) {
     unsigned height = 0;
     vector<bool> seen(nodes.size(), false);

@@ -32,8 +32,9 @@ struct graph {
     graph(std::fstream& fs);
     void print();
     unsigned eccentricity(node_t start);
+    // returns distance from start to all other nodes + 1
+    void distances(node_t start, std::vector<unsigned>& seen);
 
-private:
     void add_transition(std::vector<unsigned short>& offset, node_t src,
                         node_t dst);
     nodes_t nodes;
