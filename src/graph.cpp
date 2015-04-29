@@ -19,30 +19,20 @@ graph::graph(fstream& fs) {
         nodes[idx].deg = deg;
         nb_tr += deg;
     }
-    assert(nb_tr % 2 == 0);
     transitions.reserve(1 + nb_tr);
     // Push sentinell transition which will act as nullptr
     transitions.emplace_back(0, 0);
-    unsigned src;
-    unsigned dst;
+    unsigned src, dst;
     fs >> src >> dst;
     while (!fs.eof()) {
-        {
-            transition_t succ = nodes[src].first;
-            transitions.emplace_back(succ, dst);
-            nodes[src].first = static_cast<unsigned>(transitions.size() - 1);
-        }
-        {
-            transition_t succ = nodes[dst].first;
-            transitions.emplace_back(succ, src);
-            nodes[dst].first = static_cast<unsigned>(transitions.size() - 1);
-        }
+        add_transition(src, dst);
+        add_transition(dst, src);
         fs >> src >> dst;
     }
     assert(transitions.size() == 1 + nb_tr);
 }
 
-void graph::iterate() {
+void graph::print() {
     for (unsigned i = 0; i < nodes.size(); ++i) {
         cout << "node: " << i << endl;
         const node& n = nodes[i];
@@ -52,4 +42,10 @@ void graph::iterate() {
             t = transitions[t].next;
         }
     }
+}
+
+void graph::add_transition(transition_t src, transition_t dst) {
+    transition_t succ = nodes[dst].first;
+    transitions.emplace_back(succ, src);
+    nodes[dst].first = static_cast<unsigned>(transitions.size() - 1);
 }

@@ -23,8 +23,10 @@ using transitions_t = std::vector<transition>;
 
 struct graph {
     graph(std::fstream& fs);
-    void iterate();
+    void print();
 
+private:
+    void add_transition(transition_t src, transition_t dst);
     nodes_t nodes;
     transitions_t transitions;
 };

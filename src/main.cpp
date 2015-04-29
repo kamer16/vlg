@@ -14,4 +14,5 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     graph g(fs);
+    g.print();
 }
