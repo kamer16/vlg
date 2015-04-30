@@ -58,13 +58,20 @@ void graph::distances(node_t start, vector<unsigned>& seen) {
     }
 }
 
-unsigned graph::eccentricity(node_t start) {
+unsigned graph::double_sweep_lower_bound(node_t start) {
+    auto p = eccentricity(start);
+    return eccentricity(p.second).first;
+}
+
+pair<unsigned, node_t> graph::eccentricity(node_t start) {
     unsigned height = 0;
+    node_t res = start;
     vector<bool> seen(nodes.size(), false);
     deque<unsigned> todo;
     todo.emplace_back(start);
     while (!todo.empty()) {
         ++height;
+        res = todo.front();
         size_t len = todo.size();
         // Iterate from 0 to todo.size(), romev those elements and add new
         // ones at back withouth iterating on them
@@ -81,7 +88,7 @@ unsigned graph::eccentricity(node_t start) {
             }
         }
     }
-    return height - 1;
+    return { height - 1, res };
 }
 
 graph::graph(fstream& fs) {
