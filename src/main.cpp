@@ -23,13 +23,17 @@ int main(int argc, char* argv[]) {
     cout << "Number of sccs: " << g.scc_count() << " with "
          << g.scc_nb_nodes(max_scc_idx) << " maximum nodes" << endl;
 
-    for (unsigned i = 0; i < 10; ++i) {
+    cout << "Sorting graph" << endl;
+    vector<node_t> nodes = g.sort_by_deg();
+    for (unsigned i = 0; i < 30; ++i) {
       // Only use nodes within the giant scc
       node_t id = static_cast<unsigned>(rand()) % g.nb_nodes();
       while (g.scc_id_of(id) != max_scc_idx)
           id = static_cast<unsigned>(rand()) % g.nb_nodes();
       //cout << g.eccentricity(id).first << endl;
-      cout << g.double_sweep_lower_bound(id) << endl;
+      //cout << g.double_sweep_lower_bound(id) << endl;
+      //cout << g.trivial_upper_bound(id) << endl;
+      cout << g.trivial_upper_bound(nodes[i]) << endl;
     }
     return 0;
 }

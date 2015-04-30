@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <deque>
@@ -5,6 +6,82 @@
 #include "graph.hpp"
 
 using namespace std;
+
+vector<node_t> graph::sort_by_deg() {
+    vector<node_t> res;
+    res.reserve(nb_nodes());
+    for (unsigned i = 0; i < nb_nodes(); ++i) {
+        res.push_back(i);
+    }
+    sort(res.begin(), res.end(),
+         [&](node_t l, node_t r) -> bool {
+             return nodes[l].deg > nodes[r].deg;
+         });
+    return res;
+}
+
+void graph::bfs_spanning_tree(node_t start) {
+    deque<unsigned> todo;
+    todo.emplace_back(start);
+    spanning_tree.assign(nodes.size(), -1U);
+    tree_deg.assign(nodes.size(), -1U);
+    spanning_tree[start] = start;
+    tree_deg[start] = 0;
+    while (!todo.empty()) {
+        node_t id = todo.front();
+        todo.pop_front();
+        const node& src = nodes[id];
+        for (unsigned t = 0; t < src.deg; ++t) {
+            node_t dst = transitions[t + src.first].dst;
+            if (spanning_tree[dst] == -1U) {
+                todo.emplace_back(dst);
+                spanning_tree[dst] = id;
+                tree_deg[dst] = 0;
+                tree_deg[id]++;
+          }
+        }
+    }
+}
+
+unsigned graph::trivial_upper_bound(node_t start) {
+    bfs_spanning_tree(start);
+    deque<unsigned> todo;
+    for (unsigned idx = 0; idx < tree_deg.size(); ++idx) {
+        if (tree_deg[idx] == 0) // Push Leaves
+            todo.push_back(idx);
+    }
+    node_t id = todo.front();
+    todo.pop_front();
+
+    // Instead of recursive function, use iterative version and use multiple
+    // vectors wich replace our stack.
+    vector<unsigned> heights(nodes.size(), 0);
+    vector<unsigned> subtree_max1_height(nodes.size(), 0);
+    vector<unsigned> subtree_max2_height(nodes.size(), 0);
+    vector<unsigned> subtree_max_dist(nodes.size(), 0);
+    const auto& t = spanning_tree;
+    while (id != start) {
+        heights[t[id]] = max(heights[t[id]], heights[id] + 1);
+        if (heights[id] + 1 > subtree_max1_height[t[id]]) {
+            subtree_max2_height[t[id]] = subtree_max1_height[t[id]];
+            subtree_max1_height[t[id]] = heights[id] + 1;
+        } else if (heights[id] + 1 > subtree_max2_height[t[id]]) {
+            subtree_max2_height[t[id]] = heights[id] + 1;
+        }
+        subtree_max_dist[t[id]] = max(subtree_max_dist[t[id]],
+                                      subtree_max_dist[id]);
+        subtree_max_dist[t[id]] = max(subtree_max_dist[t[id]],
+                                      subtree_max1_height[t[id]] +
+                                      subtree_max2_height[t[id]]);
+        tree_deg[t[id]]--;
+        if (tree_deg[t[id]] == 0) {
+            todo.push_back(t[id]);
+        }
+        id = todo.front();
+        todo.pop_front();
+    }
+    return subtree_max_dist[start];
+}
 
 void graph::scc_bfs(node_t start) {
     deque<unsigned> todo;
@@ -16,11 +93,11 @@ void graph::scc_bfs(node_t start) {
         todo.pop_front();
         const node& src = nodes[id];
         for (unsigned t = 0; t < src.deg; ++t) {
-          node_t dst = transitions[t + src.first].dst;
-          if (scc[dst] == -1U) {
-            todo.emplace_back(dst);
-            scc[dst] = static_cast<unsigned>(scc_size.size() - 1);
-            scc_size[scc_size.size() - 1]++;
+            node_t dst = transitions[t + src.first].dst;
+            if (scc[dst] == -1U) {
+                todo.emplace_back(dst);
+                scc[dst] = static_cast<unsigned>(scc_size.size() - 1);
+                scc_size[scc_size.size() - 1]++;
           }
         }
     }
