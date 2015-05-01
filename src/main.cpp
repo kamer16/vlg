@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         else if (!strncmp(argv[2], "-tub", 4))
           opt = 4;
         else if (!strncmp(argv[2], "-tlb", 4))
-          opt = 9;
+          opt = 0;
         else
           cerr << "Warning: unrecognized option: " << argv[2] << endl;
     }
