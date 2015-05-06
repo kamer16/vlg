@@ -45,6 +45,7 @@ public:
     unsigned compute_scc();
     graph(std::fstream& fs);
     void print();
+    void reorder(std::fstream& os);
 
     // Access attributes
     size_t scc_count() { return scc_size.size(); }
@@ -55,6 +56,7 @@ public:
 private:
     transitions_t transitions;
     nodes_t nodes;
+    unsigned max_scc_idx;
 
     // Gives the scc id for each node
     std::vector<unsigned> scc;

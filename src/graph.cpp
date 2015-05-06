@@ -20,6 +20,48 @@ vector<node_t> graph::sort_by_deg() {
     return res;
 }
 
+void graph::reorder(std::fstream& os) {
+    auto degs = sort_by_deg();
+    deque<unsigned> todo;
+    size_t start = nodes.size() - 1;
+    while (scc_id_of(degs[start]) != max_scc_idx)
+      --start;
+    todo.emplace_back(degs[start]);
+    vector<node_t> map(nodes.size(), -1U);
+    node_t m = 0;
+    map[degs[start]] = degs[start];
+    while (!todo.empty()) {
+        m++;
+        node_t id = todo.front();
+        todo.pop_front();
+        const node& src = nodes[id];
+        for (unsigned t = 0; t < src.deg; ++t) {
+            node_t dst = transitions[t + src.first].dst;
+            if (map[dst] == -1U) {
+                todo.emplace_back(dst);
+                map[dst] = id;
+          }
+        }
+    }
+    assert(m + 1 == scc_size[max_scc_idx]);
+    for (unsigned i = 0; i < map.size(); ++i) {
+        if (map[i] == -1U)
+          continue;
+        os << map[i] << " " << nodes[i].deg << endl;
+    }
+    for (unsigned i = 0; i < map.size(); ++i) {
+        if (map[i] == -1U)
+          continue;
+        const node& n = nodes[i];
+        for (unsigned t = 0; t < n.deg; ++t) {
+            node_t dst = transitions[t + n.first].dst;
+            node_t src = i;
+            assert(map[dst] != -1U);
+            cout << map[src] << " " << map[dst] << endl;
+        }
+    }
+}
+
 void graph::bfs_spanning_tree(node_t start) {
     deque<unsigned> todo;
     todo.emplace_back(start);
@@ -113,6 +155,7 @@ unsigned graph::compute_scc() {
             res = scc_size[idx] < scc_size[res] ? res : idx;
         }
     }
+    max_scc_idx = res;
     return res;
 }
 
