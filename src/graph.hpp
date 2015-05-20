@@ -52,6 +52,7 @@ public:
     unsigned scc_id_of(node_t node) { return scc[node]; }
     size_t scc_nb_nodes(unsigned component) { return scc_size[component]; }
     size_t nb_nodes() const { return nodes.size(); }
+    size_t deg_of(node_t id) const { return nodes[id].deg; }
 
 private:
     transitions_t transitions;

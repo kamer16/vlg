@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
                 cout << "Sorting graph" << endl;
                 nodes = g.sort_by_deg();
             }
+            cout << "Deg: " << g.deg_of(nodes[i]) << " ";
             res = g.trivial_upper_bound(nodes[i]);
         } else {
             break;
