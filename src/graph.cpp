@@ -20,7 +20,8 @@ vector<node_t> graph::sort_by_deg() {
     return res;
 }
 
-void graph::reorder(std::fstream& os) {
+void graph::reorder(std::ofstream& os) {
+    // We want to start on node with lowest degree
     auto degs = sort_by_deg();
     deque<unsigned> todo;
     size_t start = nodes.size() - 1;
@@ -28,10 +29,10 @@ void graph::reorder(std::fstream& os) {
       --start;
     todo.emplace_back(degs[start]);
     vector<node_t> map(nodes.size(), -1U);
-    node_t m = 0;
-    map[degs[start]] = degs[start];
+    node_t m = 1;
+    // New value of node at degs[start] is 0
+    map[degs[start]] = 0;
     while (!todo.empty()) {
-        m++;
         node_t id = todo.front();
         todo.pop_front();
         const node& src = nodes[id];
@@ -39,11 +40,12 @@ void graph::reorder(std::fstream& os) {
             node_t dst = transitions[t + src.first].dst;
             if (map[dst] == -1U) {
                 todo.emplace_back(dst);
-                map[dst] = id;
+                map[dst] = m++;
           }
         }
     }
-    assert(m + 1 == scc_size[max_scc_idx]);
+    assert(m == scc_size[max_scc_idx]);
+    os << m << endl;
     for (unsigned i = 0; i < map.size(); ++i) {
         if (map[i] == -1U)
           continue;
@@ -53,12 +55,15 @@ void graph::reorder(std::fstream& os) {
         if (map[i] == -1U)
           continue;
         const node& n = nodes[i];
+        // Make sure to not print twice transition so mark each node
         for (unsigned t = 0; t < n.deg; ++t) {
             node_t dst = transitions[t + n.first].dst;
             node_t src = i;
-            assert(map[dst] != -1U);
-            cout << map[src] << " " << map[dst] << endl;
+            if (map[dst] != -1U) {
+                os << map[src] << " " << map[dst] << endl;
+            }
         }
+        map[i] = -1U;
     }
 }
 
@@ -215,14 +220,14 @@ graph::graph(fstream& fs) {
     unsigned nb_states;
     unsigned nb_tr = 0;
     fs >> nb_states;
-    nodes = nodes_t();
-    nodes.reserve(nb_states);
+    nodes = nodes_t(nb_states, node(0, 0));
+    //nodes.reserve(nb_states);
 
     for (unsigned i = 0; i < nb_states; ++i) {
         unsigned idx;
         unsigned deg;
         fs >> idx >> deg;
-        nodes.emplace_back(deg, nb_tr);
+        nodes[idx] = node(deg, nb_tr);
         // nb_tr also corresponds to the idx in our transitions_t
         nb_tr += deg;
     }

@@ -40,12 +40,12 @@ public:
 
     // returns distance from start to all other nodes
     void distances(node_t start, std::vector<unsigned>& seen);
-    // computes the strongly connected componetns
+    // Return list of nodes in ascending order of degree
     std::vector<node_t> sort_by_deg();
     unsigned compute_scc();
     graph(std::fstream& fs);
     void print();
-    void reorder(std::fstream& os);
+    void reorder(std::ofstream& os);
 
     // Access attributes
     size_t scc_count() { return scc_size.size(); }

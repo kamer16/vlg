@@ -85,21 +85,24 @@ int main(int argc, char* argv[]) {
                 nodes = g.sort_by_deg();
             }
             res = g.trivial_upper_bound(nodes[i]);
+        } else {
+            break;
         }
         cout << i << ":\t" << res << endl;
     }
     if (opt == 5) {
-        std::cout << "opening " << argv[3] << " " << argc << endl;
+        std::cout << "opening " << argv[3] << endl;
         if (argc <= 3) {
             cerr << "I need to know the output file"  << endl;
             return 1;
         }
-        fs.open(argv[3]);
-        if (!fs.good()) {
+        ofstream file;
+        file.open(argv[3]);
+        if (!file.good()) {
             cerr << "Bad input file " << argv[3]  << endl;
             return 1;
         }
-        g.reorder(fs);
+        g.reorder(file);
     }
     return 0;
 }
